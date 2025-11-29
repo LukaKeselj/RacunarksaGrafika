@@ -12,6 +12,12 @@ struct Target {
     bool active;
 };
 
+struct Button {
+    float x, y;
+    float width, height;
+    bool isHovered;
+};
+
 class AimTrainer {
 private:
     unsigned int shaderProgram;
@@ -20,6 +26,7 @@ private:
     unsigned int textVAO, textVBO;
     
     std::vector<Target> targets;
+    Button restartButton;
     int score;
     int lives;
     int maxLives;
@@ -42,6 +49,7 @@ private:
     void drawCircle(float x, float y, float radius, float r, float g, float b);
     void drawText(float x, float y, const char* text, float scale);
     void drawRect(float x, float y, float width, float height, float r, float g, float b);
+    bool isPointInRect(float px, float py, float rx, float ry, float rw, float rh);
     
 public:
     AimTrainer(int width, int height);
@@ -50,5 +58,6 @@ public:
     void update(float deltaTime);
     void render();
     void handleMouseClick(double mouseX, double mouseY);
+    void restart();
     bool isGameOver() const { return gameOver; }
 };

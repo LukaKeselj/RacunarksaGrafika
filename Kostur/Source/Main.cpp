@@ -15,6 +15,14 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     }
 }
 
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_R && action == GLFW_PRESS && game) {
+        if (game->isGameOver()) {
+            game->restart();
+        }
+    }
+}
+
 int main()
 {
     glfwInit();
@@ -40,6 +48,7 @@ int main()
     }
 
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
+    glfwSetKeyCallback(window, keyCallback);
 
     glClearColor(0.15f, 0.15f, 0.2f, 1.0f);
 

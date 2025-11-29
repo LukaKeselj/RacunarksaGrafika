@@ -21,6 +21,17 @@ AimTrainer::AimTrainer(int width, int height)
     startTime = glfwGetTime();
     lastHitTime = startTime;
     
+    float boxWidth = 400;
+    float boxHeight = 280;
+    float boxX = (windowWidth - boxWidth) / 2;
+    float boxY = (windowHeight - boxHeight) / 2;
+    
+    restartButton.x = boxX + 80;
+    restartButton.y = boxY + 200;
+    restartButton.width = 240;
+    restartButton.height = 50;
+    restartButton.isHovered = false;
+    
     for (int i = 0; i < 3; i++) {
         spawnTarget();
     }
@@ -76,6 +87,29 @@ void AimTrainer::spawnTarget() {
     target.active = true;
     
     targets.push_back(target);
+}
+
+void AimTrainer::restart() {
+    score = 0;
+    lives = 3;
+    gameOver = false;
+    spawnTimer = 0.0f;
+    hitCount = 0;
+    totalHitTime = 0.0;
+    gameOverTime = 0.0;
+    survivalTime = 0.0;
+    avgHitSpeed = 0.0;
+    
+    targets.clear();
+    
+    startTime = glfwGetTime();
+    lastHitTime = startTime;
+    
+    for (int i = 0; i < 3; i++) {
+        spawnTarget();
+    }
+    
+    std::cout << "\n=== NOVA IGRA ===" << std::endl;
 }
 
 void AimTrainer::update(float deltaTime) {
@@ -161,7 +195,7 @@ void AimTrainer::render() {
                   << " | Pogodaka: " << score << " | Avg Speed: " << hitSpeed << "s         \r" << std::flush;
     } else {
         float boxWidth = 400;
-        float boxHeight = 250;
+        float boxHeight = 280;
         float boxX = (windowWidth - boxWidth) / 2;
         float boxY = (windowHeight - boxHeight) / 2;
         
@@ -170,11 +204,18 @@ void AimTrainer::render() {
         
         drawRect(boxX + 100, boxY + 50, 200, 40, 0.8f, 0.2f, 0.2f);
         
-        std::cout << "\n\n=== GAME OVER ===" << std::endl;
-        std::cout << "Vreme preživljavanja: " << (int)survivalTime << "s" << std::endl;
-        std::cout << "Ukupno pogodaka: " << score << std::endl;
-        std::cout << "Prose?na brzina poga?anja: " << avgHitSpeed << "s" << std::endl;
-        std::cout << "================\n" << std::endl;
+        drawRect(restartButton.x, restartButton.y, restartButton.width, restartButton.height, 0.2f, 0.8f, 0.2f);
+        
+        static bool printedOnce = false;
+        if (!printedOnce) {
+            std::cout << "\n\n=== GAME OVER ===" << std::endl;
+            std::cout << "Vreme preživljavanja: " << (int)survivalTime << "s" << std::endl;
+            std::cout << "Ukupno pogodaka: " << score << std::endl;
+            std::cout << "Prose?na brzina poga?anja: " << avgHitSpeed << "s" << std::endl;
+            std::cout << "\nPritisni 'R' ili klikni na zeleno dugme za restart" << std::endl;
+            std::cout << "================\n" << std::endl;
+            printedOnce = true;
+        }
     }
 }
 
@@ -222,7 +263,13 @@ void AimTrainer::drawRect(float x, float y, float width, float height, float r, 
 }
 
 void AimTrainer::handleMouseClick(double mouseX, double mouseY) {
-    if (gameOver) return;
+    if (gameOver) {
+        if (isPointInRect(static_cast<float>(mouseX), static_cast<float>(mouseY), 
+                         restartButton.x, restartButton.y, restartButton.width, restartButton.height)) {
+            restart();
+        }
+        return;
+    }
     
     double currentTime = glfwGetTime();
     
@@ -248,4 +295,8 @@ void AimTrainer::handleMouseClick(double mouseX, double mouseY) {
             }
         }
     }
+}
+
+bool AimTrainer::isPointInRect(float px, float py, float rx, float ry, float rw, float rh) {
+    return px >= rx && px <= rx + rw && py >= ry && py <= ry + rh;
 }
