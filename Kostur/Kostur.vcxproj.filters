@@ -57,6 +57,8 @@
     <None Include="AIM_TRAINER_README.md" />
     <None Include="Shaders\freetype.vert" />
     <None Include="Shaders\freetype.frag" />
+    <None Include="Shaders\texture.vert" />
+    <None Include="Shaders\texture.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\CROSSHAIR_README.txt" />

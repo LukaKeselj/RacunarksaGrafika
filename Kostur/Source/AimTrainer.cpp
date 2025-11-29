@@ -29,6 +29,7 @@ AimTrainer::AimTrainer(int width, int height)
     }
     
     studentInfoTexture = loadImageToTexture("Resources/indeks.png");
+    backgroundTexture = loadImageToTexture("Resources/mirage.png");
     
     initBuffers();
     
@@ -69,6 +70,7 @@ AimTrainer::~AimTrainer() {
     glDeleteProgram(textureShaderProgram);
     glDeleteProgram(freetypeShaderProgram);
     glDeleteTextures(1, &studentInfoTexture);
+    glDeleteTextures(1, &backgroundTexture);
     if (textRenderer) delete textRenderer;
 }
 
@@ -96,6 +98,18 @@ void AimTrainer::initBuffers() {
     
     glGenVertexArrays(1, &textVAO);
     glGenBuffers(1, &textVBO);
+    
+    glGenVertexArrays(1, &textureVAO);
+    glGenBuffers(1, &textureVBO);
+    
+    glBindVertexArray(textureVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, textureVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
     
     glBindVertexArray(0);
 }
@@ -178,6 +192,8 @@ void AimTrainer::update(float deltaTime) {
 }
 
 void AimTrainer::render() {
+    drawTexture(0, 0, static_cast<float>(windowWidth), static_cast<float>(windowHeight), backgroundTexture);
+    
     glUseProgram(shaderProgram);
     
     float projection[16] = {
@@ -370,6 +386,19 @@ void AimTrainer::drawRect(float x, float y, float width, float height, float r, 
     int colorLoc = glGetUniformLocation(textShaderProgram, "uColor");
     glUniform3f(colorLoc, r, g, b);
     
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void AimTrainer::drawTexture(float x, float y, float width, float height, unsigned int texture) {
+    glUseProgram(textureShaderProgram);
+    
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    
+    int texLoc = glGetUniformLocation(textureShaderProgram, "uTexture");
+    glUniform1i(texLoc, 0);
+    
+    glBindVertexArray(textureVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 

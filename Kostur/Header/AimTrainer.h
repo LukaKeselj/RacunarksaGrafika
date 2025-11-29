@@ -29,6 +29,7 @@ private:
     unsigned int textVAO, textVBO;
     unsigned int textureVAO, textureVBO;
     unsigned int studentInfoTexture;
+    unsigned int backgroundTexture;
     TextRenderer* textRenderer;
     
     std::vector<Target> targets;
