@@ -178,39 +178,6 @@ unsigned loadImageToTextureNoFlip(const char* filePath) {
     }
 }
 
-unsigned int createStudentInfoTexture(const char* name, const char* surname, const char* index) {
-    const int width = 300;
-    const int height = 100;
-    
-    unsigned char* data = new unsigned char[width * height * 4];
-    
-    for (int i = 0; i < width * height * 4; i += 4) {
-        data[i + 0] = 20;
-        data[i + 1] = 20;
-        data[i + 2] = 30;
-        data[i + 3] = 180;
-    }
-    
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    
-    delete[] data;
-    
-    glBindTexture(GL_TEXTURE_2D, 0);
-    
-    std::cout << "Student info texture created: " << name << " " << surname << " - " << index << std::endl;
-    
-    return texture;
-}
-
 GLFWcursor* loadImageToCursor(const char* filePath) {
     int TextureWidth;
     int TextureHeight;

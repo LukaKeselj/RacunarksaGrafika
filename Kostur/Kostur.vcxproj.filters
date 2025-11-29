@@ -27,7 +27,7 @@
     <ClCompile Include="Source\Crosshair.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\SimpleFont.cpp">
+    <ClCompile Include="Source\TextRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -44,7 +44,7 @@
     <ClInclude Include="Header\Crosshair.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Header\SimpleFont.h">
+    <ClInclude Include="Header\TextRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -106,7 +106,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>freetype28d.lib;opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\Keselj\Desktop\RacunarskaGrafika\RacunarksaGrafika\Kostur\packages\freetype.2.8.0.1\build\native\lib\x64\v141\static\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -121,20 +122,21 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>freetype28.lib;opengl32.lib$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\AimTrainer.cpp" />
     <ClCompile Include="Source\Crosshair.cpp" />
     <ClCompile Include="Source\Main.cpp" />
-    <ClCompile Include="Source\SimpleFont.cpp" />
+    <ClCompile Include="Source\TextRenderer.cpp" />
     <ClCompile Include="Source\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\AimTrainer.h" />
     <ClInclude Include="Header\Crosshair.h" />
-    <ClInclude Include="Header\SimpleFont.h" />
     <ClInclude Include="Header\stb_image.h" />
+    <ClInclude Include="Header\TextRenderer.h" />
     <ClInclude Include="Header\Util.h" />
   </ItemGroup>
   <ItemGroup>

@@ -14,17 +14,21 @@ AimTrainer::AimTrainer(int width, int height)
       targetLifeTimeMultiplier(1.0f), minTargetLifeTime(1.0f),
       windowWidth(width), windowHeight(height), hitCount(0), totalHitTime(0.0),
       lastHitTime(0.0), gameOverTime(0.0), survivalTime(0.0), avgHitSpeed(0.0),
-      font(nullptr), exitRequested(false)
+      textRenderer(nullptr), exitRequested(false)
 {
     srand(static_cast<unsigned int>(time(nullptr)));
     
     shaderProgram = createShader("Shaders/basic.vert", "Shaders/circle.frag");
     textShaderProgram = createShader("Shaders/text.vert", "Shaders/text.frag");
     textureShaderProgram = createShader("Shaders/texture.vert", "Shaders/texture.frag");
+    freetypeShaderProgram = createShader("Shaders/freetype.vert", "Shaders/freetype.frag");
     
-    font = new SimpleFont(textShaderProgram, windowWidth, windowHeight);
+    textRenderer = new TextRenderer(freetypeShaderProgram, windowWidth, windowHeight);
+    if (!textRenderer->loadFont("C:/Windows/Fonts/arial.ttf", 48)) {
+        std::cout << "Warning: Failed to load Arial font" << std::endl;
+    }
     
-    studentInfoTexture = loadImageToTextureNoFlip("Resources/indeks.png");
+    studentInfoTexture = loadImageToTexture("Resources/indeks.png");
     
     initBuffers();
     
@@ -63,8 +67,9 @@ AimTrainer::~AimTrainer() {
     glDeleteProgram(shaderProgram);
     glDeleteProgram(textShaderProgram);
     glDeleteProgram(textureShaderProgram);
+    glDeleteProgram(freetypeShaderProgram);
     glDeleteTextures(1, &studentInfoTexture);
-    delete font;
+    if (textRenderer) delete textRenderer;
 }
 
 void AimTrainer::initBuffers() {
@@ -115,6 +120,8 @@ void AimTrainer::restart() {
     lives = 3;
     gameOver = false;
     spawnTimer = 0.0f;
+    spawnInterval = initialSpawnInterval;
+    targetLifeTimeMultiplier = 1.0f;
     hitCount = 0;
     totalHitTime = 0.0;
     gameOverTime = 0.0;
@@ -212,9 +219,11 @@ void AimTrainer::render() {
         int centiseconds = static_cast<int>((elapsed - static_cast<int>(elapsed)) * 100) % 100;
         
         std::stringstream timeStr;
-        timeStr << minutes << ":" << (seconds < 10 ? "0" : "") << seconds << ":" << (centiseconds < 10 ? "0" : "") << centiseconds;
+        timeStr << std::setfill('0') << std::setw(2) << minutes << ":" 
+                << std::setw(2) << seconds << ":" 
+                << std::setw(2) << centiseconds;
         
-        font->drawText(timeStr.str().c_str(), 130, 23, 30);
+        textRenderer->renderText(timeStr.str(), 130, 35, 0.6f, 1.0f, 1.0f, 1.0f);
         
         double hitSpeed = 0.0;
         if (hitCount > 0) {
@@ -235,7 +244,15 @@ void AimTrainer::render() {
         
         drawRect(restartButton.x, restartButton.y, restartButton.width, restartButton.height, 0.2f, 0.8f, 0.2f);
         
+        float restartTextWidth = textRenderer->getTextWidth("RESTART", 0.5f);
+        float restartTextX = restartButton.x + (restartButton.width - restartTextWidth) / 2;
+        textRenderer->renderText("RESTART", restartTextX, restartButton.y + 30, 0.5f, 1.0f, 1.0f, 1.0f);
+        
         drawRect(exitButton.x, exitButton.y, exitButton.width, exitButton.height, 0.8f, 0.2f, 0.2f);
+        
+        float exitTextWidth = textRenderer->getTextWidth("EXIT", 0.5f);
+        float exitTextX = exitButton.x + (exitButton.width - exitTextWidth) / 2;
+        textRenderer->renderText("EXIT", exitTextX, exitButton.y + 30, 0.5f, 1.0f, 1.0f, 1.0f);
         
         static bool printedOnce = false;
         if (!printedOnce) {

@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <chrono>
-#include "SimpleFont.h"
+#include "TextRenderer.h"
 
 struct Target {
     float x, y;
@@ -24,11 +24,12 @@ private:
     unsigned int shaderProgram;
     unsigned int textShaderProgram;
     unsigned int textureShaderProgram;
+    unsigned int freetypeShaderProgram;
     unsigned int VAO, VBO;
     unsigned int textVAO, textVBO;
     unsigned int textureVAO, textureVBO;
     unsigned int studentInfoTexture;
-    SimpleFont* font;
+    TextRenderer* textRenderer;
     
     std::vector<Target> targets;
     Button restartButton;
