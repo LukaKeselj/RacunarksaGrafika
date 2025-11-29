@@ -124,15 +124,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\AimTrainer.cpp" />
+    <ClCompile Include="Source\Crosshair.cpp" />
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Header\AimTrainer.h" />
+    <ClInclude Include="Header\Crosshair.h" />
     <ClInclude Include="Header\stb_image.h" />
     <ClInclude Include="Header\Util.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="AIM_TRAINER_README.md" />
     <None Include="packages.config" />
+    <None Include="Shaders\basic.vert" />
+    <None Include="Shaders\circle.frag" />
+    <None Include="Shaders\text.frag" />
+    <None Include="Shaders\text.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Resources\CROSSHAIR_README.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,12 +2,19 @@
 #include <GLFW/glfw3.h>
 
 #include "../Header/Util.h"
+#include "../Header/AimTrainer.h"
+#include "../Header/Crosshair.h"
 
-// Main fajl funkcija sa osnovnim komponentama OpenGL programa
+AimTrainer* game = nullptr;
 
-// Projekat je dozvoljeno pisati počevši od ovog kostura
-// Toplo se preporučuje razdvajanje koda po fajlovima (i eventualno potfolderima) !!!
-// Srećan rad!
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && game) {
+        double mouseX, mouseY;
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+        game->handleMouseClick(mouseX, mouseY);
+    }
+}
+
 int main()
 {
     glfwInit();
@@ -15,7 +22,10 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 800, "Kostur", NULL, NULL);
+    const int WINDOW_WIDTH = 1200;
+    const int WINDOW_HEIGHT = 800;
+    
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Aim Trainer", NULL, NULL);
     if (window == NULL) return endProgram("Prozor nije uspeo da se kreira.");
     glfwMakeContextCurrent(window);
 
@@ -24,16 +34,40 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glClearColor(0.2f, 0.8f, 0.6f, 1.0f);
+    GLFWcursor* crosshairCursor = createCrosshairCursor();
+    if (crosshairCursor) {
+        glfwSetCursor(window, crosshairCursor);
+    }
+
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
+
+    glClearColor(0.15f, 0.15f, 0.2f, 1.0f);
+
+    game = new AimTrainer(WINDOW_WIDTH, WINDOW_HEIGHT);
+    
+    double lastTime = glfwGetTime();
 
     while (!glfwWindowShouldClose(window))
     {
+        double currentTime = glfwGetTime();
+        float deltaTime = static_cast<float>(currentTime - lastTime);
+        lastTime = currentTime;
+        
         glClear(GL_COLOR_BUFFER_BIT);
+
+        game->update(deltaTime);
+        game->render();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    delete game;
+    
+    if (crosshairCursor) {
+        glfwDestroyCursor(crosshairCursor);
+    }
+    
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
