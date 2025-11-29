@@ -1,2 +1,0 @@
-C:\Users\Vuk\Documents\Vasa\Grafika\RG_V4\Kostur\x64\Debug\glew32.dll
-C:\Users\Keselj\Desktop\RacunarskaGrafika\RacunarksaGrafika\Kostur\x64\Debug\glew32.dll
