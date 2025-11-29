@@ -55,6 +55,7 @@ private:
     double survivalTime;
     double avgHitSpeed;
     bool exitRequested;
+    int totalClicks;
     
     void initBuffers();
     void spawnTarget();

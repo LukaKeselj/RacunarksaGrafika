@@ -14,7 +14,7 @@ AimTrainer::AimTrainer(int width, int height)
       targetLifeTimeMultiplier(1.0f), minTargetLifeTime(1.0f),
       windowWidth(width), windowHeight(height), hitCount(0), totalHitTime(0.0),
       lastHitTime(0.0), gameOverTime(0.0), survivalTime(0.0), avgHitSpeed(0.0),
-      textRenderer(nullptr), exitRequested(false)
+      textRenderer(nullptr), exitRequested(false), totalClicks(0)
 {
     srand(static_cast<unsigned int>(time(nullptr)));
     
@@ -35,19 +35,19 @@ AimTrainer::AimTrainer(int width, int height)
     startTime = glfwGetTime();
     lastHitTime = startTime;
     
-    float boxWidth = 400;
-    float boxHeight = 330;
+    float boxWidth = 450;
+    float boxHeight = 400;
     float boxX = (windowWidth - boxWidth) / 2;
     float boxY = (windowHeight - boxHeight) / 2;
     
-    restartButton.x = boxX + 80;
-    restartButton.y = boxY + 200;
+    restartButton.x = boxX + 105;
+    restartButton.y = boxY + 270;
     restartButton.width = 240;
     restartButton.height = 50;
     restartButton.isHovered = false;
     
-    exitButton.x = boxX + 80;
-    exitButton.y = boxY + 260;
+    exitButton.x = boxX + 105;
+    exitButton.y = boxY + 330;
     exitButton.width = 240;
     exitButton.height = 50;
     exitButton.isHovered = false;
@@ -127,6 +127,7 @@ void AimTrainer::restart() {
     gameOverTime = 0.0;
     survivalTime = 0.0;
     avgHitSpeed = 0.0;
+    totalClicks = 0;
     
     targets.clear();
     
@@ -203,8 +204,8 @@ void AimTrainer::render() {
         double currentTime = glfwGetTime();
         double elapsed = currentTime - startTime;
         
-        drawRect(10, 10, 550, 80, 0.0f, 0.0f, 0.0f);
-        drawRect(12, 12, 546, 76, 0.2f, 0.2f, 0.2f);
+        drawRect(10, 10, 700, 80, 0.0f, 0.0f, 0.0f);
+        drawRect(12, 12, 696, 76, 0.2f, 0.2f, 0.2f);
         
         for (int i = 0; i < maxLives; i++) {
             if (i < lives) {
@@ -225,22 +226,83 @@ void AimTrainer::render() {
         
         textRenderer->renderText(timeStr.str(), 130, 35, 0.6f, 1.0f, 1.0f, 1.0f);
         
+        std::stringstream statsStr;
+        statsStr << "Hits: " << score << "/" << totalClicks;
+        textRenderer->renderText(statsStr.str(), 330, 35, 0.5f, 0.4f, 1.0f, 0.4f);
+        
+        double avgSpeed = 0.0;
+        if (hitCount > 0) {
+            avgSpeed = totalHitTime / hitCount;
+        }
+        
+        std::stringstream speedStr;
+        speedStr << "Speed: " << std::fixed << std::setprecision(2) << avgSpeed << " s";
+        textRenderer->renderText(speedStr.str(), 480, 35, 0.45f, 1.0f, 0.8f, 0.3f);
+        
         double hitSpeed = 0.0;
         if (hitCount > 0) {
             hitSpeed = totalHitTime / hitCount;
         }
         
+        float accuracy = 0.0f;
+        if (totalClicks > 0) {
+            accuracy = (static_cast<float>(score) / static_cast<float>(totalClicks)) * 100.0f;
+        }
+        
         std::cout << "Time: " << minutes << ":" << (seconds < 10 ? "0" : "") << seconds << ":" << (centiseconds < 10 ? "0" : "") << centiseconds
                   << " | Zivoti: " << lives << "/" << maxLives 
-                  << " | Pogodaka: " << score << " | Avg Speed: " << hitSpeed << "s         \r" << std::flush;
+                  << " | Pogodaka: " << score << "/" << totalClicks << " (" << std::fixed << std::setprecision(1) << accuracy << "%)"
+                  << " | Avg Speed: " << hitSpeed << "s         \r" << std::flush;
     } else {
-        float boxWidth = 400;
-        float boxHeight = 330;
+        float boxWidth = 450;
+        float boxHeight = 400;
         float boxX = (windowWidth - boxWidth) / 2;
         float boxY = (windowHeight - boxHeight) / 2;
         
         drawRect(boxX, boxY, boxWidth, boxHeight, 0.0f, 0.0f, 0.0f);
         drawRect(boxX + 2, boxY + 2, boxWidth - 4, boxHeight - 4, 0.3f, 0.3f, 0.3f);
+        
+        std::string gameOverText = "GAME OVER";
+        float gameOverWidth = textRenderer->getTextWidth(gameOverText, 1.0f);
+        float gameOverX = boxX + (boxWidth - gameOverWidth) / 2;
+        textRenderer->renderText(gameOverText, gameOverX, boxY + 50, 1.0f, 1.0f, 0.2f, 0.2f);
+        
+        int survivalMinutes = static_cast<int>(survivalTime) / 60;
+        int survivalSeconds = static_cast<int>(survivalTime) % 60;
+        std::stringstream timeText;
+        timeText << "Time: " << survivalMinutes << ":" << std::setfill('0') << std::setw(2) << survivalSeconds;
+        
+        float timeWidth = textRenderer->getTextWidth(timeText.str(), 0.5f);
+        float timeX = boxX + (boxWidth - timeWidth) / 2;
+        textRenderer->renderText(timeText.str(), timeX, boxY + 110, 0.5f, 0.8f, 0.8f, 1.0f);
+        
+        float accuracy = 0.0f;
+        if (totalClicks > 0) {
+            accuracy = (static_cast<float>(score) / static_cast<float>(totalClicks)) * 100.0f;
+        }
+        
+        std::stringstream accuracyText;
+        accuracyText << "Accuracy: " << std::fixed << std::setprecision(1) << accuracy << "%";
+        float accuracyWidth = textRenderer->getTextWidth(accuracyText.str(), 0.5f);
+        float accuracyX = boxX + (boxWidth - accuracyWidth) / 2;
+        textRenderer->renderText(accuracyText.str(), accuracyX, boxY + 150, 0.5f, 0.4f, 1.0f, 0.4f);
+        
+        std::stringstream hitsText;
+        hitsText << "Hits: " << score << " / " << totalClicks;
+        float hitsWidth = textRenderer->getTextWidth(hitsText.str(), 0.45f);
+        float hitsX = boxX + (boxWidth - hitsWidth) / 2;
+        textRenderer->renderText(hitsText.str(), hitsX, boxY + 185, 0.45f, 0.9f, 0.9f, 0.9f);
+        
+        double avgSpeed = 0.0;
+        if (hitCount > 0) {
+            avgSpeed = totalHitTime / hitCount;
+        }
+        
+        std::stringstream speedText;
+        speedText << "Speed: " << std::fixed << std::setprecision(2) << avgSpeed << " s";
+        float speedWidth = textRenderer->getTextWidth(speedText.str(), 0.45f);
+        float speedX = boxX + (boxWidth - speedWidth) / 2;
+        textRenderer->renderText(speedText.str(), speedX, boxY + 220, 0.45f, 1.0f, 0.8f, 0.3f);
         
         drawRect(restartButton.x, restartButton.y, restartButton.width, restartButton.height, 0.2f, 0.8f, 0.2f);
         
@@ -323,6 +385,8 @@ void AimTrainer::handleMouseClick(double mouseX, double mouseY) {
         }
         return;
     }
+    
+    totalClicks++;
     
     double currentTime = glfwGetTime();
     
