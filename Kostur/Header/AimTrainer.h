@@ -37,10 +37,6 @@ private:
     bool gameOver;
     float spawnTimer;
     float spawnInterval;
-    float initialSpawnInterval;
-    float minSpawnInterval;
-    float targetLifeTimeMultiplier;
-    float minTargetLifeTime;
     int windowWidth;
     int windowHeight;
     
@@ -50,7 +46,6 @@ private:
     
     void initBuffers();
     void spawnTarget();
-    void updateDifficulty();
     void drawCircle(float x, float y, float radius, float r, float g, float b);
     void drawText(float x, float y, const char* text, float scale);
     void drawRect(float x, float y, float width, float height, float r, float g, float b);

@@ -7,9 +7,7 @@
 #include <iostream>
 
 AimTrainer::AimTrainer(int width, int height) 
-    : score(0), lives(3), maxLives(3), gameOver(false), spawnTimer(0.0f), 
-      spawnInterval(1.5f), initialSpawnInterval(1.5f), minSpawnInterval(0.5f),
-      targetLifeTimeMultiplier(1.0f), minTargetLifeTime(1.0f),
+    : score(0), lives(3), maxLives(3), gameOver(false), spawnTimer(0.0f), spawnInterval(1.5f),
       windowWidth(width), windowHeight(height), hitCount(0), totalHitTime(0.0),
       lastHitTime(0.0), gameOverTime(0.0), survivalTime(0.0), avgHitSpeed(0.0)
 {
@@ -84,8 +82,7 @@ void AimTrainer::spawnTarget() {
     target.y = target.radius + static_cast<float>(rand()) / RAND_MAX * (windowHeight - 2 * target.radius - 100);
     target.y += 50;
     
-    float baseLifeTime = 2.0f + static_cast<float>(rand()) / RAND_MAX * 2.0f;
-    target.maxLifeTime = std::max(minTargetLifeTime, baseLifeTime * targetLifeTimeMultiplier);
+    target.maxLifeTime = 2.0f + static_cast<float>(rand()) / RAND_MAX * 2.0f;
     target.lifeTime = target.maxLifeTime;
     target.active = true;
     
@@ -97,8 +94,6 @@ void AimTrainer::restart() {
     lives = 3;
     gameOver = false;
     spawnTimer = 0.0f;
-    spawnInterval = initialSpawnInterval;
-    targetLifeTimeMultiplier = 1.0f;
     hitCount = 0;
     totalHitTime = 0.0;
     gameOverTime = 0.0;
@@ -119,8 +114,6 @@ void AimTrainer::restart() {
 
 void AimTrainer::update(float deltaTime) {
     if (gameOver) return;
-    
-    updateDifficulty();
     
     spawnTimer += deltaTime;
     if (spawnTimer >= spawnInterval) {
@@ -306,15 +299,4 @@ void AimTrainer::handleMouseClick(double mouseX, double mouseY) {
 
 bool AimTrainer::isPointInRect(float px, float py, float rx, float ry, float rw, float rh) {
     return px >= rx && px <= rx + rw && py >= ry && py <= ry + rh;
-}
-
-void AimTrainer::updateDifficulty() {
-    double currentTime = glfwGetTime();
-    double elapsed = currentTime - startTime;
-    
-    float difficultyFactor = 1.0f - (static_cast<float>(elapsed) / 120.0f);
-    difficultyFactor = std::max(0.3f, difficultyFactor);
-    
-    spawnInterval = std::max(minSpawnInterval, initialSpawnInterval * difficultyFactor);
-    targetLifeTimeMultiplier = difficultyFactor;
 }
