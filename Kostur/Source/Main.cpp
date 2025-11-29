@@ -16,6 +16,10 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
+    
     if (key == GLFW_KEY_R && action == GLFW_PRESS && game) {
         if (game->isGameOver()) {
             game->restart();
@@ -30,12 +34,17 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    const int WINDOW_WIDTH = 1200;
-    const int WINDOW_HEIGHT = 800;
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
     
-    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Aim Trainer", NULL, NULL);
+    const int WINDOW_WIDTH = mode->width;
+    const int WINDOW_HEIGHT = mode->height;
+    
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Aim Trainer", monitor, NULL);
     if (window == NULL) return endProgram("Prozor nije uspeo da se kreira.");
     glfwMakeContextCurrent(window);
+
+    glfwSwapInterval(1);
 
     if (glewInit() != GLEW_OK) return endProgram("GLEW nije uspeo da se inicijalizuje.");
 
@@ -55,19 +64,29 @@ int main()
     game = new AimTrainer(WINDOW_WIDTH, WINDOW_HEIGHT);
     
     double lastTime = glfwGetTime();
+    const double targetFPS = 75.0;
+    const double targetFrameTime = 1.0 / targetFPS;
 
     while (!glfwWindowShouldClose(window))
     {
         double currentTime = glfwGetTime();
-        float deltaTime = static_cast<float>(currentTime - lastTime);
-        lastTime = currentTime;
+        double deltaTime = currentTime - lastTime;
         
-        glClear(GL_COLOR_BUFFER_BIT);
+        if (deltaTime >= targetFrameTime) {
+            lastTime = currentTime;
+            
+            glClear(GL_COLOR_BUFFER_BIT);
 
-        game->update(deltaTime);
-        game->render();
+            game->update(static_cast<float>(deltaTime));
+            game->render();
 
-        glfwSwapBuffers(window);
+            if (game->shouldExit()) {
+                glfwSetWindowShouldClose(window, GLFW_TRUE);
+            }
+
+            glfwSwapBuffers(window);
+        }
+        
         glfwPollEvents();
     }
 

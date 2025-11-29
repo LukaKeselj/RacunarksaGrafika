@@ -27,6 +27,9 @@
     <ClCompile Include="Source\Crosshair.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\SimpleFont.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Header\stb_image.h">
@@ -41,6 +44,9 @@
     <ClInclude Include="Header\Crosshair.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Header\SimpleFont.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -49,6 +55,8 @@
     <None Include="Shaders\text.vert" />
     <None Include="Shaders\text.frag" />
     <None Include="AIM_TRAINER_README.md" />
+    <None Include="Shaders\freetype.vert" />
+    <None Include="Shaders\freetype.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\CROSSHAIR_README.txt" />

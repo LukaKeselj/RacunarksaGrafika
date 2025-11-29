@@ -5,16 +5,26 @@
 #include <ctime>
 #include <algorithm>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 
 AimTrainer::AimTrainer(int width, int height) 
-    : score(0), lives(3), maxLives(3), gameOver(false), spawnTimer(0.0f), spawnInterval(1.5f),
+    : score(0), lives(3), maxLives(3), gameOver(false), spawnTimer(0.0f), 
+      spawnInterval(1.5f), initialSpawnInterval(1.5f), minSpawnInterval(0.5f),
+      targetLifeTimeMultiplier(1.0f), minTargetLifeTime(1.0f),
       windowWidth(width), windowHeight(height), hitCount(0), totalHitTime(0.0),
-      lastHitTime(0.0), gameOverTime(0.0), survivalTime(0.0), avgHitSpeed(0.0)
+      lastHitTime(0.0), gameOverTime(0.0), survivalTime(0.0), avgHitSpeed(0.0),
+      font(nullptr), exitRequested(false)
 {
     srand(static_cast<unsigned int>(time(nullptr)));
     
     shaderProgram = createShader("Shaders/basic.vert", "Shaders/circle.frag");
     textShaderProgram = createShader("Shaders/text.vert", "Shaders/text.frag");
+    textureShaderProgram = createShader("Shaders/texture.vert", "Shaders/texture.frag");
+    
+    font = new SimpleFont(textShaderProgram, windowWidth, windowHeight);
+    
+    studentInfoTexture = loadImageToTextureNoFlip("Resources/indeks.png");
     
     initBuffers();
     
@@ -22,7 +32,7 @@ AimTrainer::AimTrainer(int width, int height)
     lastHitTime = startTime;
     
     float boxWidth = 400;
-    float boxHeight = 280;
+    float boxHeight = 330;
     float boxX = (windowWidth - boxWidth) / 2;
     float boxY = (windowHeight - boxHeight) / 2;
     
@@ -31,6 +41,12 @@ AimTrainer::AimTrainer(int width, int height)
     restartButton.width = 240;
     restartButton.height = 50;
     restartButton.isHovered = false;
+    
+    exitButton.x = boxX + 80;
+    exitButton.y = boxY + 260;
+    exitButton.width = 240;
+    exitButton.height = 50;
+    exitButton.isHovered = false;
     
     for (int i = 0; i < 3; i++) {
         spawnTarget();
@@ -42,8 +58,13 @@ AimTrainer::~AimTrainer() {
     glDeleteBuffers(1, &VBO);
     glDeleteVertexArrays(1, &textVAO);
     glDeleteBuffers(1, &textVBO);
+    glDeleteVertexArrays(1, &textureVAO);
+    glDeleteBuffers(1, &textureVBO);
     glDeleteProgram(shaderProgram);
     glDeleteProgram(textShaderProgram);
+    glDeleteProgram(textureShaderProgram);
+    glDeleteTextures(1, &studentInfoTexture);
+    delete font;
 }
 
 void AimTrainer::initBuffers() {
@@ -175,8 +196,8 @@ void AimTrainer::render() {
         double currentTime = glfwGetTime();
         double elapsed = currentTime - startTime;
         
-        drawRect(10, 10, 400, 80, 0.0f, 0.0f, 0.0f);
-        drawRect(12, 12, 396, 76, 0.2f, 0.2f, 0.2f);
+        drawRect(10, 10, 550, 80, 0.0f, 0.0f, 0.0f);
+        drawRect(12, 12, 546, 76, 0.2f, 0.2f, 0.2f);
         
         for (int i = 0; i < maxLives; i++) {
             if (i < lives) {
@@ -186,25 +207,35 @@ void AimTrainer::render() {
             }
         }
         
+        int minutes = static_cast<int>(elapsed) / 60;
+        int seconds = static_cast<int>(elapsed) % 60;
+        int centiseconds = static_cast<int>((elapsed - static_cast<int>(elapsed)) * 100) % 100;
+        
+        std::stringstream timeStr;
+        timeStr << minutes << ":" << (seconds < 10 ? "0" : "") << seconds << ":" << (centiseconds < 10 ? "0" : "") << centiseconds;
+        
+        font->drawText(timeStr.str().c_str(), 130, 23, 30);
+        
         double hitSpeed = 0.0;
         if (hitCount > 0) {
             hitSpeed = totalHitTime / hitCount;
         }
         
-        std::cout << "Time: " << (int)elapsed << "s | Zivoti: " << lives << "/" << maxLives 
+        std::cout << "Time: " << minutes << ":" << (seconds < 10 ? "0" : "") << seconds << ":" << (centiseconds < 10 ? "0" : "") << centiseconds
+                  << " | Zivoti: " << lives << "/" << maxLives 
                   << " | Pogodaka: " << score << " | Avg Speed: " << hitSpeed << "s         \r" << std::flush;
     } else {
         float boxWidth = 400;
-        float boxHeight = 280;
+        float boxHeight = 330;
         float boxX = (windowWidth - boxWidth) / 2;
         float boxY = (windowHeight - boxHeight) / 2;
         
         drawRect(boxX, boxY, boxWidth, boxHeight, 0.0f, 0.0f, 0.0f);
         drawRect(boxX + 2, boxY + 2, boxWidth - 4, boxHeight - 4, 0.3f, 0.3f, 0.3f);
         
-        drawRect(boxX + 100, boxY + 50, 200, 40, 0.8f, 0.2f, 0.2f);
-        
         drawRect(restartButton.x, restartButton.y, restartButton.width, restartButton.height, 0.2f, 0.8f, 0.2f);
+        
+        drawRect(exitButton.x, exitButton.y, exitButton.width, exitButton.height, 0.8f, 0.2f, 0.2f);
         
         static bool printedOnce = false;
         if (!printedOnce) {
@@ -212,7 +243,8 @@ void AimTrainer::render() {
             std::cout << "Vreme preživljavanja: " << (int)survivalTime << "s" << std::endl;
             std::cout << "Ukupno pogodaka: " << score << std::endl;
             std::cout << "Prose?na brzina poga?anja: " << avgHitSpeed << "s" << std::endl;
-            std::cout << "\nPritisni 'R' ili klikni na zeleno dugme za restart" << std::endl;
+            std::cout << "\nPritisni 'R' za restart ili klikni na zeleno dugme" << std::endl;
+            std::cout << "Pritisni 'ESC' za izlaz ili klikni na crveno dugme" << std::endl;
             std::cout << "================\n" << std::endl;
             printedOnce = true;
         }
@@ -268,6 +300,10 @@ void AimTrainer::handleMouseClick(double mouseX, double mouseY) {
                          restartButton.x, restartButton.y, restartButton.width, restartButton.height)) {
             restart();
         }
+        else if (isPointInRect(static_cast<float>(mouseX), static_cast<float>(mouseY), 
+                              exitButton.x, exitButton.y, exitButton.width, exitButton.height)) {
+            exitRequested = true;
+        }
         return;
     }
     
@@ -295,6 +331,10 @@ void AimTrainer::handleMouseClick(double mouseX, double mouseY) {
             }
         }
     }
+}
+
+bool AimTrainer::shouldExit() const {
+    return exitRequested;
 }
 
 bool AimTrainer::isPointInRect(float px, float py, float rx, float ry, float rw, float rh) {
