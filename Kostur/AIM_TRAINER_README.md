@@ -1,39 +1,69 @@
-# Aim Trainer Game
+﻿# 🎯 Aim Trainer Game
 
-## Opis igre
-Ova 2D aim trainer igra je bazirana na https://aimtrainer.io/challenge konceptu.
+## 📋 Opis
 
-## Kako igrati:
-1. Crveni krugovi ?e se pojavljivati na ekranu
-2. Klikni na krugove pre nego �to nestanu
-3. Cilj je da pre�ivi� �to du�e - ako svi krugovi nestanu, igra je gotova!
-4. Krugovi imaju ograni?eno vreme �ivota (2-4 sekunde)
-5. Novi krugovi se pojavljuju svakih 1.5 sekundi
+2D aim trainer igra bazirana na [aimtrainer.io/challenge](https://aimtrainer.io/challenge) konceptu.  
+Umesto krugova, koriste se **CT/T glave iz CS2**.
 
-## Statistike tokom igre:
-- **Vreme** - Koliko dugo si �iv u igri
-- **Broj pogodaka** - Ukupan broj pogo?enih krugova
-- **Prose?na brzina** - Prose?no vreme izme?u pogodaka
+---
 
-## Statistike na kraju igre:
-Kada izgubi� (svi krugovi nestanu), vide?e�:
-- Ukupno vreme pre�ivljavanja
-- Ukupan broj pogodaka
-- Prose?na brzina poga?anja meta
+## 🎮 Kako igrati
 
-## Tehni?ki detalji:
-- Krugovi su crvene boje (RGB: 1.0, 0.3, 0.3)
-- Svi krugovi su iste veli?ine (radius: 50 piksela)
-- Pojavljuju se na random lokacijama
-- Ne preklapaju se sa gornjom statistikom
+- CT/T glave će se pojavljivati na ekranu
+- **Klikni na glave** pre nego što nestanu
+- **Cilj**: Preživeti što duže – imaš **3 života** ❤️
+- Gubiš jedan život svaki put kada meta nestane
+- **Igra se završava** kada izgubiš sva 3 života
+- Mete imaju **ograničeno vreme života** (2–4 sekunde)
+- **Brzina pojavljivanja** meta postaje sve brža kako vreme prolazi
 
-## Kontrole:
-- **Levi klik mi�a** - Pucaj/Pogodi metu
-- **Esc** - Zatvori prozor
+---
 
-## Napomena:
-- Dodaj crosshair.png sliku u Resources folder za custom kursor
-- Ili ostavi bez slike da bi koristio default sistem kursor
-- Statistike se ispisuju u konzoli za bolji pregled
+## ❤️ Sistem Života
 
-Sre?no! ??
+- Počinješ sa **3 srca**
+- Gubiš **1 srce** svaki put kada meta nestane bez pogotka
+- Puna srca ❤️ prikazuju preostale živote
+- Prazna srca 🤍 prikazuju izgubljene živote
+- Kada izgubiš sva srca → **GAME OVER**
+
+---
+
+## 📊 Statistike
+
+### Tokom igre:
+- ❤️ **Životi** – Prikazani kao srca u gornjem levom uglu
+- ⏱️ **Vreme** – Koliko dugo si živ u igri
+- 🎯 **Broj pogodaka** – Ukupan broj pogođenih meta / ukupan broj klikova
+- ⚡ **Prosečna brzina** – Prosečno vreme između pogodaka
+
+### Na kraju igre:
+Kada izgubiš sva srca, videćeš:
+- 🏁 Ukupno vreme preživljavanja
+- 🎯 Accuracy (Preciznost pogađanja)
+- 🎯 Ukupan broj pogodaka / ukupan broj klikova
+- ⚡ Prosečna brzina pogađanja meta
+
+---
+
+## 🔧 Tehnički detalji
+
+- **Mete**: CT/T glave iz CS2
+- **Veličina**: Sve mete su iste veličine (~50 piksela radijus)
+- **Pozicioniranje**: Random lokacije koje se ne preklapaju sa gornjom statistikom
+- **Spawn rate**: Ubrzava se što duže preživljavaš
+- **Sistem života**: 3 srca, vizuelno prikazana pomoću ikonica
+
+---
+
+## 🕹️ Kontrole
+
+| Taster | Akcija |
+|--------|--------|
+| **Levi klik miša** | Pucaj / Pogodi metu |
+| **R** (na Game Over ekranu) | Restart igre |
+| **Esc** | Zatvori prozor |
+
+---
+
+**Srećno! 🎯**

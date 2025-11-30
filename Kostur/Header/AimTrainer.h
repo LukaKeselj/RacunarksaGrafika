@@ -34,6 +34,8 @@ private:
     unsigned int backgroundTexture;
     unsigned int terroristTexture;
     unsigned int counterTexture;
+    unsigned int heartTexture;
+    unsigned int emptyHeartTexture;
     TextRenderer* textRenderer;
     
     std::vector<Target> targets;

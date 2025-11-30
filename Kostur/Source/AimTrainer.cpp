@@ -33,6 +33,8 @@ AimTrainer::AimTrainer(int width, int height)
     backgroundTexture = loadImageToTexture("Resources/mirage.png");
     terroristTexture = loadImageToTexture("Resources/terrorist.png");
     counterTexture = loadImageToTexture("Resources/counter.png");
+    heartTexture = loadImageToTexture("Resources/heart.png");
+    emptyHeartTexture = loadImageToTexture("Resources/empty-heart.png");
     
     initBuffers();
     
@@ -73,6 +75,8 @@ AimTrainer::~AimTrainer() {
     glDeleteTextures(1, &backgroundTexture);
     glDeleteTextures(1, &terroristTexture);
     glDeleteTextures(1, &counterTexture);
+    glDeleteTextures(1, &heartTexture);
+    glDeleteTextures(1, &emptyHeartTexture);
     if (textRenderer) delete textRenderer;
 }
 
@@ -240,9 +244,9 @@ void AimTrainer::render() {
         
         for (int i = 0; i < maxLives; i++) {
             if (i < lives) {
-                drawRect(20 + i * 30, 20, 20, 20, 1.0f, 0.2f, 0.2f);
+                drawTexture(20 + i * 35, 22, 28, 28, heartTexture);
             } else {
-                drawRect(20 + i * 30, 20, 20, 20, 0.3f, 0.3f, 0.3f);
+                drawTexture(20 + i * 35, 22, 28, 28, emptyHeartTexture);
             }
         }
         
@@ -481,13 +485,40 @@ void AimTrainer::drawRect(float x, float y, float width, float height, float r, 
 void AimTrainer::drawTexture(float x, float y, float width, float height, unsigned int texture) {
     glUseProgram(textureShaderProgram);
     
+    float projection[16] = {
+        2.0f / windowWidth, 0.0f, 0.0f, 0.0f,
+        0.0f, -2.0f / windowHeight, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, 1.0f, 0.0f, 1.0f
+    };
+    
+    int projLoc = glGetUniformLocation(textureShaderProgram, "uProjection");
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection);
+    
+    float vertices[] = {
+        x, y, 0.0f, 1.0f,
+        x + width, y, 1.0f, 1.0f,
+        x + width, y + height, 1.0f, 0.0f,
+        x, y, 0.0f, 1.0f,
+        x + width, y + height, 1.0f, 0.0f,
+        x, y + height, 0.0f, 0.0f
+    };
+    
+    glBindVertexArray(textureVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, textureVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+    
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
     
     int texLoc = glGetUniformLocation(textureShaderProgram, "uTexture");
     glUniform1i(texLoc, 0);
     
-    glBindVertexArray(textureVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
