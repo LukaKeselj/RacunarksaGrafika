@@ -22,6 +22,7 @@ AimTrainer::AimTrainer(int width, int height)
     textShaderProgram = createShader("Shaders/text.vert", "Shaders/text.frag");
     textureShaderProgram = createShader("Shaders/texture.vert", "Shaders/texture.frag");
     freetypeShaderProgram = createShader("Shaders/freetype.vert", "Shaders/freetype.frag");
+    texturedCircleShaderProgram = createShader("Shaders/textured_circle.vert", "Shaders/textured_circle.frag");
     
     textRenderer = new TextRenderer(freetypeShaderProgram, windowWidth, windowHeight);
     if (!textRenderer->loadFont("C:/Windows/Fonts/arial.ttf", 48)) {
@@ -30,6 +31,7 @@ AimTrainer::AimTrainer(int width, int height)
     
     studentInfoTexture = loadImageToTexture("Resources/indeks.png");
     backgroundTexture = loadImageToTexture("Resources/mirage.png");
+    terroristTexture = loadImageToTexture("Resources/terrorist.png");
     
     initBuffers();
     
@@ -69,8 +71,10 @@ AimTrainer::~AimTrainer() {
     glDeleteProgram(textShaderProgram);
     glDeleteProgram(textureShaderProgram);
     glDeleteProgram(freetypeShaderProgram);
+    glDeleteProgram(texturedCircleShaderProgram);
     glDeleteTextures(1, &studentInfoTexture);
     glDeleteTextures(1, &backgroundTexture);
+    glDeleteTextures(1, &terroristTexture);
     if (textRenderer) delete textRenderer;
 }
 
@@ -194,7 +198,13 @@ void AimTrainer::update(float deltaTime) {
 void AimTrainer::render() {
     drawTexture(0, 0, static_cast<float>(windowWidth), static_cast<float>(windowHeight), backgroundTexture);
     
-    glUseProgram(shaderProgram);
+    for (const auto& target : targets) {
+        if (target.active) {
+            drawCircle(target.x, target.y, target.radius, 1.0f, 0.3f, 0.3f);
+        }
+    }
+    
+    glUseProgram(textShaderProgram);
     
     float projection[16] = {
         2.0f / windowWidth, 0.0f, 0.0f, 0.0f,
@@ -203,17 +213,7 @@ void AimTrainer::render() {
         -1.0f, 1.0f, 0.0f, 1.0f
     };
     
-    int projLoc = glGetUniformLocation(shaderProgram, "uProjection");
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection);
-    
-    for (const auto& target : targets) {
-        if (target.active) {
-            drawCircle(target.x, target.y, target.radius, 1.0f, 0.3f, 0.3f);
-        }
-    }
-    
-    glUseProgram(textShaderProgram);
-    projLoc = glGetUniformLocation(textShaderProgram, "uProjection");
+    int projLoc = glGetUniformLocation(textShaderProgram, "uProjection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection);
     
     if (!gameOver) {
@@ -403,6 +403,18 @@ void AimTrainer::render() {
 }
 
 void AimTrainer::drawCircle(float x, float y, float radius, float r, float g, float b) {
+    glUseProgram(texturedCircleShaderProgram);
+    
+    float projection[16] = {
+        2.0f / windowWidth, 0.0f, 0.0f, 0.0f,
+        0.0f, -2.0f / windowHeight, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, 1.0f, 0.0f, 1.0f
+    };
+    
+    int projLoc = glGetUniformLocation(texturedCircleShaderProgram, "uProjection");
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection);
+    
     glBindVertexArray(VAO);
     
     float model[16] = {
@@ -412,11 +424,17 @@ void AimTrainer::drawCircle(float x, float y, float radius, float r, float g, fl
         x, y, 0.0f, 1.0f
     };
     
-    int modelLoc = glGetUniformLocation(shaderProgram, "uModel");
+    int modelLoc = glGetUniformLocation(texturedCircleShaderProgram, "uModel");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model);
     
-    int colorLoc = glGetUniformLocation(shaderProgram, "uColor");
+    int colorLoc = glGetUniformLocation(texturedCircleShaderProgram, "uColor");
     glUniform3f(colorLoc, r, g, b);
+    
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, terroristTexture);
+    
+    int texLoc = glGetUniformLocation(texturedCircleShaderProgram, "uTexture");
+    glUniform1i(texLoc, 0);
     
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }

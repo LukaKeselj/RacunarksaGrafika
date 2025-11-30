@@ -25,11 +25,13 @@ private:
     unsigned int textShaderProgram;
     unsigned int textureShaderProgram;
     unsigned int freetypeShaderProgram;
+    unsigned int texturedCircleShaderProgram;
     unsigned int VAO, VBO;
     unsigned int textVAO, textVBO;
     unsigned int textureVAO, textureVBO;
     unsigned int studentInfoTexture;
     unsigned int backgroundTexture;
+    unsigned int terroristTexture;
     TextRenderer* textRenderer;
     
     std::vector<Target> targets;

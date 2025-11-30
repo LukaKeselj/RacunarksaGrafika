@@ -59,6 +59,8 @@
     <None Include="Shaders\freetype.frag" />
     <None Include="Shaders\texture.vert" />
     <None Include="Shaders\texture.frag" />
+    <None Include="Shaders\textured_circle.vert" />
+    <None Include="Shaders\textured_circle.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\CROSSHAIR_README.txt" />

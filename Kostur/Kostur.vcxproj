@@ -150,6 +150,8 @@
     <None Include="Shaders\text.vert" />
     <None Include="Shaders\texture.frag" />
     <None Include="Shaders\texture.vert" />
+    <None Include="Shaders\textured_circle.frag" />
+    <None Include="Shaders\textured_circle.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resources\CROSSHAIR_README.txt" />
