@@ -10,8 +10,8 @@
 
 AimTrainer::AimTrainer(int width, int height) 
     : score(0), lives(3), maxLives(3), gameOver(false), spawnTimer(0.0f), 
-      spawnInterval(1.5f), initialSpawnInterval(1.5f), minSpawnInterval(0.5f),
-      targetLifeTimeMultiplier(1.0f), minTargetLifeTime(1.0f),
+      spawnInterval(1.5f), initialSpawnInterval(1.5f), minSpawnInterval(0.3f),
+      targetLifeTimeMultiplier(1.0f), minTargetLifeTime(0.4f),
       windowWidth(width), windowHeight(height), hitCount(0), totalHitTime(0.0),
       lastHitTime(0.0), gameOverTime(0.0), survivalTime(0.0), avgHitSpeed(0.0),
       textRenderer(nullptr), exitRequested(false), totalClicks(0)
@@ -55,10 +55,6 @@ AimTrainer::AimTrainer(int width, int height)
     exitButton.width = 240;
     exitButton.height = 50;
     exitButton.isHovered = false;
-    
-    for (int i = 0; i < 3; i++) {
-        spawnTarget();
-    }
 }
 
 AimTrainer::~AimTrainer() {
@@ -128,7 +124,7 @@ void AimTrainer::spawnTarget() {
     target.y = target.radius + static_cast<float>(rand()) / RAND_MAX * (windowHeight - 2 * target.radius - 100);
     target.y += 50;
     
-    target.maxLifeTime = 2.0f + static_cast<float>(rand()) / RAND_MAX * 2.0f;
+    target.maxLifeTime = (2.0f + static_cast<float>(rand()) / RAND_MAX * 2.0f) * targetLifeTimeMultiplier;
     target.lifeTime = target.maxLifeTime;
     target.active = true;
     
@@ -156,15 +152,13 @@ void AimTrainer::restart() {
     startTime = glfwGetTime();
     lastHitTime = startTime;
     
-    for (int i = 0; i < 3; i++) {
-        spawnTarget();
-    }
-    
     std::cout << "\n=== NOVA IGRA ===" << std::endl;
 }
 
 void AimTrainer::update(float deltaTime) {
     if (gameOver) return;
+    
+    updateDifficulty();
     
     spawnTimer += deltaTime;
     if (spawnTimer >= spawnInterval) {
@@ -197,6 +191,23 @@ void AimTrainer::update(float deltaTime) {
             [](const Target& t) { return !t.active; }),
         targets.end()
     );
+}
+
+void AimTrainer::updateDifficulty() {
+    double currentTime = glfwGetTime();
+    double elapsedTime = currentTime - startTime;
+    
+    float difficultyFactor = static_cast<float>(elapsedTime) / 5.0f;
+    
+    spawnInterval = initialSpawnInterval - (difficultyFactor * 0.2f);
+    if (spawnInterval < minSpawnInterval) {
+        spawnInterval = minSpawnInterval;
+    }
+    
+    targetLifeTimeMultiplier = 1.0f - (difficultyFactor * 0.12f);
+    if (targetLifeTimeMultiplier < minTargetLifeTime) {
+        targetLifeTimeMultiplier = minTargetLifeTime;
+    }
 }
 
 void AimTrainer::render() {
