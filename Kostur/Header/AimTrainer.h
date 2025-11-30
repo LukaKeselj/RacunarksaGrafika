@@ -11,6 +11,7 @@ struct Target {
     float lifeTime;
     float maxLifeTime;
     bool active;
+    unsigned int texture;
 };
 
 struct Button {
@@ -32,6 +33,7 @@ private:
     unsigned int studentInfoTexture;
     unsigned int backgroundTexture;
     unsigned int terroristTexture;
+    unsigned int counterTexture;
     TextRenderer* textRenderer;
     
     std::vector<Target> targets;
@@ -63,7 +65,7 @@ private:
     void initBuffers();
     void spawnTarget();
     void updateDifficulty();
-    void drawCircle(float x, float y, float radius, float r, float g, float b);
+    void drawCircle(float x, float y, float radius, float r, float g, float b, unsigned int texture);
     void drawText(float x, float y, const char* text, float scale);
     void drawRect(float x, float y, float width, float height, float r, float g, float b);
     void drawTexture(float x, float y, float width, float height, unsigned int texture);

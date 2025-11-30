@@ -32,6 +32,7 @@ AimTrainer::AimTrainer(int width, int height)
     studentInfoTexture = loadImageToTexture("Resources/indeks.png");
     backgroundTexture = loadImageToTexture("Resources/mirage.png");
     terroristTexture = loadImageToTexture("Resources/terrorist.png");
+    counterTexture = loadImageToTexture("Resources/counter.png");
     
     initBuffers();
     
@@ -75,6 +76,7 @@ AimTrainer::~AimTrainer() {
     glDeleteTextures(1, &studentInfoTexture);
     glDeleteTextures(1, &backgroundTexture);
     glDeleteTextures(1, &terroristTexture);
+    glDeleteTextures(1, &counterTexture);
     if (textRenderer) delete textRenderer;
 }
 
@@ -129,6 +131,8 @@ void AimTrainer::spawnTarget() {
     target.maxLifeTime = 2.0f + static_cast<float>(rand()) / RAND_MAX * 2.0f;
     target.lifeTime = target.maxLifeTime;
     target.active = true;
+    
+    target.texture = (rand() % 2 == 0) ? terroristTexture : counterTexture;
     
     targets.push_back(target);
 }
@@ -200,7 +204,7 @@ void AimTrainer::render() {
     
     for (const auto& target : targets) {
         if (target.active) {
-            drawCircle(target.x, target.y, target.radius, 1.0f, 0.3f, 0.3f);
+            drawCircle(target.x, target.y, target.radius, 1.0f, 0.3f, 0.3f, target.texture);
         }
     }
     
@@ -402,7 +406,7 @@ void AimTrainer::render() {
     }
 }
 
-void AimTrainer::drawCircle(float x, float y, float radius, float r, float g, float b) {
+void AimTrainer::drawCircle(float x, float y, float radius, float r, float g, float b, unsigned int texture) {
     glUseProgram(texturedCircleShaderProgram);
     
     float projection[16] = {
@@ -431,7 +435,7 @@ void AimTrainer::drawCircle(float x, float y, float radius, float r, float g, fl
     glUniform3f(colorLoc, r, g, b);
     
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, terroristTexture);
+    glBindTexture(GL_TEXTURE_2D, texture);
     
     int texLoc = glGetUniformLocation(texturedCircleShaderProgram, "uTexture");
     glUniform1i(texLoc, 0);
