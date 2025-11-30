@@ -269,6 +269,62 @@ void AimTrainer::render() {
                   << " | Zivoti: " << lives << "/" << maxLives 
                   << " | Pogodaka: " << score << "/" << totalClicks << " (" << std::fixed << std::setprecision(1) << accuracy << "%)"
                   << " | Avg Speed: " << hitSpeed << "s         \r" << std::flush;
+        
+        float infoWidth = 400.0f;
+        float infoHeight = 200.0f;
+        float infoX = windowWidth - infoWidth - 20;
+        float infoY = windowHeight - infoHeight - 20;
+        
+        float ndcX = (infoX / windowWidth) * 2.0f - 1.0f;
+        float ndcY = -((infoY / windowHeight) * 2.0f - 1.0f);
+        float ndcWidth = (infoWidth / windowWidth) * 2.0f;
+        float ndcHeight = (infoHeight / windowHeight) * 2.0f;
+        
+        float infoVertices[] = {
+            ndcX, ndcY, 0.0f, 1.0f,
+            ndcX + ndcWidth, ndcY, 1.0f, 1.0f,
+            ndcX + ndcWidth, ndcY - ndcHeight, 1.0f, 0.0f,
+            ndcX, ndcY, 0.0f, 1.0f,
+            ndcX + ndcWidth, ndcY - ndcHeight, 1.0f, 0.0f,
+            ndcX, ndcY - ndcHeight, 0.0f, 0.0f
+        };
+        
+        glUseProgram(textureShaderProgram);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, studentInfoTexture);
+        
+        int texLoc = glGetUniformLocation(textureShaderProgram, "uTexture");
+        glUniform1i(texLoc, 0);
+        
+        glBindVertexArray(textureVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, textureVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(infoVertices), infoVertices, GL_DYNAMIC_DRAW);
+        
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+        
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        
+        glBindVertexArray(textureVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, textureVBO);
+        
+        float backgroundVertices[] = {
+            -1.0f, -1.0f,  0.0f, 0.0f,
+             1.0f, -1.0f,  1.0f, 0.0f,
+             1.0f,  1.0f,  1.0f, 1.0f,
+            -1.0f, -1.0f,  0.0f, 0.0f,
+             1.0f,  1.0f,  1.0f, 1.0f,
+            -1.0f,  1.0f,  0.0f, 1.0f
+        };
+        
+        glBufferData(GL_ARRAY_BUFFER, sizeof(backgroundVertices), backgroundVertices, GL_STATIC_DRAW);
+        
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+        glEnableVertexAttribArray(1);
     } else {
         float boxWidth = 450;
         float boxHeight = 400;
