@@ -5,7 +5,6 @@ in vec2 FragPos;
 out vec4 FragColor;
 
 uniform sampler2D uTexture;
-uniform vec3 uColor;
 
 void main()
 {

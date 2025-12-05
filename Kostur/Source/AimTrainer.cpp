@@ -14,12 +14,12 @@ AimTrainer::AimTrainer(int width, int height)
       targetLifeTimeMultiplier(1.0f), minTargetLifeTime(0.4f),
       windowWidth(width), windowHeight(height), hitCount(0), totalHitTime(0.0),
       lastHitTime(0.0), gameOverTime(0.0), survivalTime(0.0), avgHitSpeed(0.0),
-      textRenderer(nullptr), exitRequested(false), totalClicks(0)
+      textRenderer(nullptr), exitRequested(false), totalClicks(0),
+      fireMode(FireMode::USP), isMousePressed(false), lastShotTime(0.0), fireRate(0.1)
 {
     srand(static_cast<unsigned int>(time(nullptr)));
     
-    shaderProgram = createShader("Shaders/basic.vert", "Shaders/circle.frag");
-    textShaderProgram = createShader("Shaders/text.vert", "Shaders/text.frag");
+    rectShaderProgram = createShader("Shaders/rect.vert", "Shaders/rect.frag");
     textureShaderProgram = createShader("Shaders/texture.vert", "Shaders/texture.frag");
     freetypeShaderProgram = createShader("Shaders/freetype.vert", "Shaders/freetype.frag");
     texturedCircleShaderProgram = createShader("Shaders/textured_circle.vert", "Shaders/textured_circle.frag");
@@ -35,6 +35,8 @@ AimTrainer::AimTrainer(int width, int height)
     counterTexture = loadImageToTexture("Resources/counter.png");
     heartTexture = loadImageToTexture("Resources/heart.png");
     emptyHeartTexture = loadImageToTexture("Resources/empty-heart.png");
+    akTexture = loadImageToTexture("Resources/ak.png");
+    uspTexture = loadImageToTexture("Resources/usp.png");
     
     initBuffers();
     
@@ -50,13 +52,11 @@ AimTrainer::AimTrainer(int width, int height)
     restartButton.y = boxY + 270;
     restartButton.width = 240;
     restartButton.height = 50;
-    restartButton.isHovered = false;
     
     exitButton.x = boxX + 105;
     exitButton.y = boxY + 330;
     exitButton.width = 240;
     exitButton.height = 50;
-    exitButton.isHovered = false;
 }
 
 AimTrainer::~AimTrainer() {
@@ -66,8 +66,7 @@ AimTrainer::~AimTrainer() {
     glDeleteBuffers(1, &textVBO);
     glDeleteVertexArrays(1, &textureVAO);
     glDeleteBuffers(1, &textureVBO);
-    glDeleteProgram(shaderProgram);
-    glDeleteProgram(textShaderProgram);
+    glDeleteProgram(rectShaderProgram);
     glDeleteProgram(textureShaderProgram);
     glDeleteProgram(freetypeShaderProgram);
     glDeleteProgram(texturedCircleShaderProgram);
@@ -77,6 +76,8 @@ AimTrainer::~AimTrainer() {
     glDeleteTextures(1, &counterTexture);
     glDeleteTextures(1, &heartTexture);
     glDeleteTextures(1, &emptyHeartTexture);
+    glDeleteTextures(1, &akTexture);
+    glDeleteTextures(1, &uspTexture);
     if (textRenderer) delete textRenderer;
 }
 
@@ -162,6 +163,17 @@ void AimTrainer::restart() {
 void AimTrainer::update(float deltaTime) {
     if (gameOver) return;
     
+    if (fireMode == FireMode::AK47 && isMousePressed) {
+        double currentTime = glfwGetTime();
+        if (currentTime - lastShotTime >= fireRate) {
+            GLFWwindow* window = glfwGetCurrentContext();
+            double mouseX, mouseY;
+            glfwGetCursorPos(window, &mouseX, &mouseY);
+            handleMouseClick(mouseX, mouseY);
+            lastShotTime = currentTime;
+        }
+    }
+    
     updateDifficulty();
     
     spawnTimer += deltaTime;
@@ -219,11 +231,11 @@ void AimTrainer::render() {
     
     for (const auto& target : targets) {
         if (target.active) {
-            drawCircle(target.x, target.y, target.radius, 1.0f, 0.3f, 0.3f, target.texture);
+            drawCircle(target.x, target.y, target.radius, target.texture);
         }
     }
     
-    glUseProgram(textShaderProgram);
+    glUseProgram(rectShaderProgram);
     
     float projection[16] = {
         2.0f / windowWidth, 0.0f, 0.0f, 0.0f,
@@ -232,7 +244,7 @@ void AimTrainer::render() {
         -1.0f, 1.0f, 0.0f, 1.0f
     };
     
-    int projLoc = glGetUniformLocation(textShaderProgram, "uProjection");
+    int projLoc = glGetUniformLocation(rectShaderProgram, "uProjection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection);
     
     if (!gameOver) {
@@ -274,10 +286,11 @@ void AimTrainer::render() {
         speedStr << "Speed: " << std::fixed << std::setprecision(2) << avgSpeed << " s";
         textRenderer->renderText(speedStr.str(), 480, 35, 0.45f, 1.0f, 0.8f, 0.3f);
         
-        double hitSpeed = 0.0;
-        if (hitCount > 0) {
-            hitSpeed = totalHitTime / hitCount;
-        }
+        std::string modeStr = (fireMode == FireMode::USP) ? "USP" : "AK-47";
+        float modeR = (fireMode == FireMode::USP) ? 0.7f : 1.0f;
+        float modeG = (fireMode == FireMode::USP) ? 0.7f : 0.5f;
+        float modeB = (fireMode == FireMode::USP) ? 0.7f : 0.2f;
+        textRenderer->renderText(modeStr, 630, 35, 0.4f, modeR, modeG, modeB);
         
         float accuracy = 0.0f;
         if (totalClicks > 0) {
@@ -287,14 +300,22 @@ void AimTrainer::render() {
         std::cout << "Time: " << minutes << ":" << (seconds < 10 ? "0" : "") << seconds << ":" << (centiseconds < 10 ? "0" : "") << centiseconds
                   << " | Zivoti: " << lives << "/" << maxLives 
                   << " | Pogodaka: " << score << "/" << totalClicks << " (" << std::fixed << std::setprecision(1) << accuracy << "%)"
-                  << " | Avg Speed: " << hitSpeed << "s         \r" << std::flush;
+                  << " | Avg Speed: " << avgSpeed << "s         \r" << std::flush;
         
         float infoWidth = 400.0f;
         float infoHeight = 200.0f;
-        float infoX = windowWidth - infoWidth - 20;
+        float infoX = 20;
         float infoY = windowHeight - infoHeight - 20;
         
         drawTexture(infoX, infoY, infoWidth, infoHeight, studentInfoTexture);
+        
+        float weaponWidth = 300.0f;
+        float weaponHeight = 150.0f;
+        float weaponX = windowWidth - weaponWidth - 20;
+        float weaponY = windowHeight - weaponHeight - 20;
+        
+        unsigned int weaponTexture = (fireMode == FireMode::USP) ? uspTexture : akTexture;
+        drawTexture(weaponX, weaponY, weaponWidth, weaponHeight, weaponTexture);
     } else {
         float boxWidth = 450;
         float boxHeight = 400;
@@ -346,6 +367,19 @@ void AimTrainer::render() {
         float speedX = boxX + (boxWidth - speedWidth) / 2;
         textRenderer->renderText(speedText.str(), speedX, boxY + 220, 0.45f, 1.0f, 0.8f, 0.3f);
         
+        // Re-postavi projection matricu i shader za crtanje dugmadi
+        glUseProgram(rectShaderProgram);
+        
+        float projection[16] = {
+            2.0f / windowWidth, 0.0f, 0.0f, 0.0f,
+            0.0f, -2.0f / windowHeight, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            -1.0f, 1.0f, 0.0f, 1.0f
+        };
+        
+        int projLoc = glGetUniformLocation(rectShaderProgram, "uProjection");
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection);
+        
         drawRect(restartButton.x, restartButton.y, restartButton.width, restartButton.height, 0.2f, 0.8f, 0.2f);
         
         float restartTextWidth = textRenderer->getTextWidth("RESTART", 0.5f);
@@ -361,9 +395,9 @@ void AimTrainer::render() {
         static bool printedOnce = false;
         if (!printedOnce) {
             std::cout << "\n\n=== GAME OVER ===" << std::endl;
-            std::cout << "Vreme preživljavanja: " << (int)survivalTime << "s" << std::endl;
+            std::cout << "Vreme prezivljavanja: " << (int)survivalTime << "s" << std::endl;
             std::cout << "Ukupno pogodaka: " << score << std::endl;
-            std::cout << "Prose?na brzina poga?anja: " << avgHitSpeed << "s" << std::endl;
+            std::cout << "Prosecna brzina pogadjanja: " << avgHitSpeed << "s" << std::endl;
             std::cout << "\nPritisni 'R' za restart ili klikni na zeleno dugme" << std::endl;
             std::cout << "Pritisni 'ESC' za izlaz ili klikni na crveno dugme" << std::endl;
             std::cout << "================\n" << std::endl;
@@ -372,7 +406,7 @@ void AimTrainer::render() {
     }
 }
 
-void AimTrainer::drawCircle(float x, float y, float radius, float r, float g, float b, unsigned int texture) {
+void AimTrainer::drawCircle(float x, float y, float radius, unsigned int texture) {
     glUseProgram(texturedCircleShaderProgram);
     
     float projection[16] = {
@@ -397,9 +431,6 @@ void AimTrainer::drawCircle(float x, float y, float radius, float r, float g, fl
     int modelLoc = glGetUniformLocation(texturedCircleShaderProgram, "uModel");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model);
     
-    int colorLoc = glGetUniformLocation(texturedCircleShaderProgram, "uColor");
-    glUniform3f(colorLoc, r, g, b);
-    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
     
@@ -410,6 +441,8 @@ void AimTrainer::drawCircle(float x, float y, float radius, float r, float g, fl
 }
 
 void AimTrainer::drawRect(float x, float y, float width, float height, float r, float g, float b) {
+    glUseProgram(rectShaderProgram);
+    
     glBindVertexArray(textVAO);
     
     float vertices[] = {
@@ -427,7 +460,7 @@ void AimTrainer::drawRect(float x, float y, float width, float height, float r, 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     
-    int colorLoc = glGetUniformLocation(textShaderProgram, "uColor");
+    int colorLoc = glGetUniformLocation(rectShaderProgram, "uColor");
     glUniform3f(colorLoc, r, g, b);
     
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -511,6 +544,25 @@ void AimTrainer::handleMouseClick(double mouseX, double mouseY) {
                 break;
             }
         }
+    }
+}
+
+void AimTrainer::handleMousePress(double mouseX, double mouseY) {
+    isMousePressed = true;
+    lastShotTime = glfwGetTime();
+    handleMouseClick(mouseX, mouseY);
+}
+
+void AimTrainer::handleMouseRelease() {
+    isMousePressed = false;
+}
+
+void AimTrainer::setFireMode(FireMode mode) {
+    fireMode = mode;
+    if (mode == FireMode::USP) {
+        std::cout << "\n[WEAPON] USP-S (Semi-Auto)" << std::endl;
+    } else {
+        std::cout << "\n[WEAPON] AK-47 (Full-Auto)" << std::endl;
     }
 }
 

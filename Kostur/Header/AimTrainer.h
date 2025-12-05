@@ -2,7 +2,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <vector>
-#include <chrono>
 #include "TextRenderer.h"
 
 struct Target {
@@ -17,13 +16,16 @@ struct Target {
 struct Button {
     float x, y;
     float width, height;
-    bool isHovered;
+};
+
+enum class FireMode {
+    USP,
+    AK47
 };
 
 class AimTrainer {
 private:
-    unsigned int shaderProgram;
-    unsigned int textShaderProgram;
+    unsigned int rectShaderProgram;
     unsigned int textureShaderProgram;
     unsigned int freetypeShaderProgram;
     unsigned int texturedCircleShaderProgram;
@@ -36,6 +38,8 @@ private:
     unsigned int counterTexture;
     unsigned int heartTexture;
     unsigned int emptyHeartTexture;
+    unsigned int akTexture;
+    unsigned int uspTexture;
     TextRenderer* textRenderer;
     
     std::vector<Target> targets;
@@ -64,11 +68,15 @@ private:
     bool exitRequested;
     int totalClicks;
     
+    FireMode fireMode;
+    bool isMousePressed;
+    double lastShotTime;
+    double fireRate;
+    
     void initBuffers();
     void spawnTarget();
     void updateDifficulty();
-    void drawCircle(float x, float y, float radius, float r, float g, float b, unsigned int texture);
-    void drawText(float x, float y, const char* text, float scale);
+    void drawCircle(float x, float y, float radius, unsigned int texture);
     void drawRect(float x, float y, float width, float height, float r, float g, float b);
     void drawTexture(float x, float y, float width, float height, unsigned int texture);
     bool isPointInRect(float px, float py, float rx, float ry, float rw, float rh);
@@ -80,6 +88,9 @@ public:
     void update(float deltaTime);
     void render();
     void handleMouseClick(double mouseX, double mouseY);
+    void handleMousePress(double mouseX, double mouseY);
+    void handleMouseRelease();
+    void setFireMode(FireMode mode);
     void restart();
     bool isGameOver() const { return gameOver; }
     bool shouldExit() const;

@@ -140,21 +140,16 @@
     <ClInclude Include="Header\Util.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="AIM_TRAINER_README.md" />
     <None Include="packages.config" />
-    <None Include="Shaders\basic.vert" />
-    <None Include="Shaders\circle.frag" />
+    <None Include="PROJEKAT_DOKUMENTACIJA.md" />
     <None Include="Shaders\freetype.frag" />
     <None Include="Shaders\freetype.vert" />
-    <None Include="Shaders\text.frag" />
-    <None Include="Shaders\text.vert" />
+    <None Include="Shaders\rect.frag" />
+    <None Include="Shaders\rect.vert" />
     <None Include="Shaders\texture.frag" />
     <None Include="Shaders\texture.vert" />
     <None Include="Shaders\textured_circle.frag" />
     <None Include="Shaders\textured_circle.vert" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Resources\CROSSHAIR_README.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

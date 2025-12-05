@@ -29,13 +29,13 @@ unsigned char* createCrosshairImage(int size, int* width, int* height) {
                               (y >= center - 1 && y <= center + 1);
             
             if (isHorizontalLine || isVerticalLine) {
-                pixels[idx + 0] = 50;
-                pixels[idx + 1] = 255;
+                pixels[idx + 0] = 255;
+                pixels[idx + 1] = 50;
                 pixels[idx + 2] = 50;
                 pixels[idx + 3] = 255;
             } else if (isCenterDot) {
-                pixels[idx + 0] = 50;
-                pixels[idx + 1] = 255;
+                pixels[idx + 0] = 255;
+                pixels[idx + 1] = 50;
                 pixels[idx + 2] = 50;
                 pixels[idx + 3] = 200;
             } else {

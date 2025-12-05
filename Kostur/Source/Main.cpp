@@ -8,10 +8,14 @@
 AimTrainer* game = nullptr;
 
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && game) {
-        double mouseX, mouseY;
-        glfwGetCursorPos(window, &mouseX, &mouseY);
-        game->handleMouseClick(mouseX, mouseY);
+    if (button == GLFW_MOUSE_BUTTON_LEFT && game) {
+        if (action == GLFW_PRESS) {
+            double mouseX, mouseY;
+            glfwGetCursorPos(window, &mouseX, &mouseY);
+            game->handleMousePress(mouseX, mouseY);
+        } else if (action == GLFW_RELEASE) {
+            game->handleMouseRelease();
+        }
     }
 }
 
@@ -24,6 +28,14 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         if (game->isGameOver()) {
             game->restart();
         }
+    }
+    
+    if (key == GLFW_KEY_1 && action == GLFW_PRESS && game) {
+        game->setFireMode(FireMode::AK47);
+    }
+    
+    if (key == GLFW_KEY_2 && action == GLFW_PRESS && game) {
+        game->setFireMode(FireMode::USP);
     }
 }
 
