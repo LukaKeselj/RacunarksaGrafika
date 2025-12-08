@@ -307,7 +307,10 @@ void AimTrainer::render() {
         float infoX = 20;
         float infoY = windowHeight - infoHeight - 20;
         
-        drawTexture(infoX, infoY, infoWidth, infoHeight, studentInfoTexture);
+        float padding = 10.0f;
+        drawRect(infoX - padding, infoY - padding, infoWidth + 2 * padding, infoHeight + 2 * padding, 0.1f, 0.1f, 0.1f, 0.5f);
+        
+        drawTexture(infoX, infoY, infoWidth, infoHeight, studentInfoTexture, 1.0f);
         
         float weaponWidth = 300.0f;
         float weaponHeight = 150.0f;
@@ -367,7 +370,6 @@ void AimTrainer::render() {
         float speedX = boxX + (boxWidth - speedWidth) / 2;
         textRenderer->renderText(speedText.str(), speedX, boxY + 220, 0.45f, 1.0f, 0.8f, 0.3f);
         
-        // Re-postavi projection matricu i shader za crtanje dugmadi
         glUseProgram(rectShaderProgram);
         
         float projection[16] = {
@@ -395,7 +397,7 @@ void AimTrainer::render() {
         static bool printedOnce = false;
         if (!printedOnce) {
             std::cout << "\n\n=== GAME OVER ===" << std::endl;
-            std::cout << "Vreme prezivljavanja: " << (int)survivalTime << "s" << std::endl;
+            std::cout << "Vreme prezivljanja: " << (int)survivalTime << "s" << std::endl;
             std::cout << "Ukupno pogodaka: " << score << std::endl;
             std::cout << "Prosecna brzina pogadjanja: " << avgHitSpeed << "s" << std::endl;
             std::cout << "\nPritisni 'R' za restart ili klikni na zeleno dugme" << std::endl;
@@ -440,7 +442,7 @@ void AimTrainer::drawCircle(float x, float y, float radius, unsigned int texture
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void AimTrainer::drawRect(float x, float y, float width, float height, float r, float g, float b) {
+void AimTrainer::drawRect(float x, float y, float width, float height, float r, float g, float b, float alpha) {
     glUseProgram(rectShaderProgram);
     
     glBindVertexArray(textVAO);
@@ -463,10 +465,13 @@ void AimTrainer::drawRect(float x, float y, float width, float height, float r, 
     int colorLoc = glGetUniformLocation(rectShaderProgram, "uColor");
     glUniform3f(colorLoc, r, g, b);
     
+    int alphaLoc = glGetUniformLocation(rectShaderProgram, "uAlpha");
+    glUniform1f(alphaLoc, alpha);
+    
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void AimTrainer::drawTexture(float x, float y, float width, float height, unsigned int texture) {
+void AimTrainer::drawTexture(float x, float y, float width, float height, unsigned int texture, float alpha) {
     glUseProgram(textureShaderProgram);
     
     float projection[16] = {
@@ -478,6 +483,9 @@ void AimTrainer::drawTexture(float x, float y, float width, float height, unsign
     
     int projLoc = glGetUniformLocation(textureShaderProgram, "uProjection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, projection);
+    
+    int alphaLoc = glGetUniformLocation(textureShaderProgram, "uAlpha");
+    glUniform1f(alphaLoc, alpha);
     
     float vertices[] = {
         x, y, 0.0f, 1.0f,

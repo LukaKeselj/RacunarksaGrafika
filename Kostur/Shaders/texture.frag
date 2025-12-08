@@ -3,8 +3,10 @@ in vec2 TexCoord;
 out vec4 FragColor;
 
 uniform sampler2D uTexture;
+uniform float uAlpha;  // Alpha vrednost (0.0-1.0)
 
 void main()
 {
-    FragColor = texture(uTexture, TexCoord);
+    vec4 texColor = texture(uTexture, TexCoord);
+    FragColor = vec4(texColor.rgb, texColor.a * uAlpha);
 }

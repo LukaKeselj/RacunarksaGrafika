@@ -141,7 +141,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="PROJEKAT_DOKUMENTACIJA.md" />
     <None Include="Shaders\freetype.frag" />
     <None Include="Shaders\freetype.vert" />
     <None Include="Shaders\rect.frag" />

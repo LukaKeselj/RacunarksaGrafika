@@ -77,8 +77,8 @@ private:
     void spawnTarget();
     void updateDifficulty();
     void drawCircle(float x, float y, float radius, unsigned int texture);
-    void drawRect(float x, float y, float width, float height, float r, float g, float b);
-    void drawTexture(float x, float y, float width, float height, unsigned int texture);
+    void drawRect(float x, float y, float width, float height, float r, float g, float b, float alpha = 1.0f);
+    void drawTexture(float x, float y, float width, float height, unsigned int texture, float alpha = 1.0f);
     bool isPointInRect(float px, float py, float rx, float ry, float rw, float rh);
     
 public:

@@ -56,7 +56,6 @@
     <None Include="Shaders\texture.frag" />
     <None Include="Shaders\textured_circle.vert" />
     <None Include="Shaders\textured_circle.frag" />
-    <None Include="PROJEKAT_DOKUMENTACIJA.md" />
     <None Include="Shaders\rect.vert" />
     <None Include="Shaders\rect.frag" />
   </ItemGroup>

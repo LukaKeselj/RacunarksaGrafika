@@ -27,6 +27,6 @@ public:
     ~TextRenderer();
     
     bool loadFont(const char* fontPath, unsigned int fontSize);
-    void renderText(const std::string& text, float x, float y, float scale, float r, float g, float b);
+    void renderText(const std::string& text, float x, float y, float scale, float r, float g, float b, float alpha = 1.0f);
     float getTextWidth(const std::string& text, float scale);
 };

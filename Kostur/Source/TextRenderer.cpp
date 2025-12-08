@@ -78,7 +78,7 @@ bool TextRenderer::loadFont(const char* fontPath, unsigned int fontSize) {
     return true;
 }
 
-void TextRenderer::renderText(const std::string& text, float x, float y, float scale, float r, float g, float b) {
+void TextRenderer::renderText(const std::string& text, float x, float y, float scale, float r, float g, float b, float alpha) {
     glUseProgram(shaderProgram);
     
     float projection[16] = {
@@ -93,6 +93,9 @@ void TextRenderer::renderText(const std::string& text, float x, float y, float s
     
     int colorLoc = glGetUniformLocation(shaderProgram, "uTextColor");
     glUniform3f(colorLoc, r, g, b);
+    
+    int alphaLoc = glGetUniformLocation(shaderProgram, "uAlpha");
+    glUniform1f(alphaLoc, alpha);
 
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO);
